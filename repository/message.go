@@ -24,7 +24,7 @@ func (m *Message) Get(ctx context.Context, id string) (*domain.Message, error) {
 	message := domain.Message{}
 	options := pgxutil.NewFindOptions().WithFilter("id", id)
 	err := pgxutil.Get(ctx, m.pool, m.tableName, options, &message)
-	return &message, err
+	return &message, parseError(err, domain.ErrMessageNotFound, domain.ErrMessageAlreadyExists)
 }
 
 func (m *Message) List(ctx context.Context, queue *domain.Queue, label *string, limit uint) ([]*domain.Message, error) {

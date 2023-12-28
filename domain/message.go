@@ -67,3 +67,11 @@ type MessageRepository interface {
 	Ack(ctx context.Context, id string) error
 	Nack(ctx context.Context, id string, visibilityTimeoutSeconds uint) error
 }
+
+// MessageService is the service interface for the Message entity.
+type MessageService interface {
+	Create(ctx context.Context, message *Message) error
+	List(ctx context.Context, queueID, label *string, limit uint) ([]*Message, error)
+	Ack(ctx context.Context, id string) error
+	Nack(ctx context.Context, id string, visibilityTimeoutSeconds uint) error
+}
