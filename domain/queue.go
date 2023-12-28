@@ -47,3 +47,15 @@ type QueueRepository interface {
 	Purge(ctx context.Context, id string) error
 	Cleanup(ctx context.Context, id string) error
 }
+
+// QueueService is the service interface for the Queue entity.
+type QueueService interface {
+	Create(ctx context.Context, queue *Queue) error
+	Update(ctx context.Context, queue *Queue) error
+	Get(ctx context.Context, id string) (*Queue, error)
+	List(ctx context.Context, offset, limit int) ([]*Queue, error)
+	Delete(ctx context.Context, id string) error
+	Stats(ctx context.Context, id string) (*QueueStats, error)
+	Purge(ctx context.Context, id string) error
+	Cleanup(ctx context.Context, id string) error
+}

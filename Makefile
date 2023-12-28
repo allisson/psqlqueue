@@ -47,3 +47,8 @@ rm-test-db:
 .PHONY: run-migration
 run-migration:
 	go run cmd/psqlqueue/main.go migrate
+
+.PHONY: create-mocks
+create-mocks:
+	@rm -rf mocks
+	mockery --all
