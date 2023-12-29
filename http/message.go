@@ -30,9 +30,8 @@ type messageResponse struct {
 
 // nolint:unused
 type messageListRequest struct {
-	Label  *string `form:"label" validate:"optional"`
-	Offset uint    `form:"offset" validate:"required"`
-	Limit  uint    `form:"limit" validate:"required"`
+	Label *string `form:"label" validate:"optional"`
+	Limit uint    `form:"limit" validate:"required"`
 } //@name MessageListRequest
 
 // nolint:unused
@@ -92,7 +91,7 @@ func (m *MessageHandler) Create(c *gin.Context) {
 //	@Accept		json
 //	@Produce	json
 //	@Param		queue_id	path		string	true	"Queue id"
-//	@Param		label		path		string	false	"Label"
+//	@Param		label		path		string	false	"Filter by label"
 //	@Param		limit		query		int		false	"The limit indicates the maximum number of items to return"
 //	@Success	200			{object}	messageListResponse
 //	@Failure	404			{object}	errorResponse
@@ -101,13 +100,12 @@ func (m *MessageHandler) Create(c *gin.Context) {
 func (m *MessageHandler) List(c *gin.Context) {
 	queueID := c.Param("queue_id")
 
-	request := messageListRequest{Offset: 0, Limit: 10}
+	request := messageListRequest{Limit: 10}
 	if err := c.ShouldBindQuery(&request); err != nil {
 		slog.Warn("message list request error", "error", err)
 	}
 
 	request.Limit = min(request.Limit, m.cfg.QueueMaxNumberOfMessages)
-	request.Offset = 0
 
 	messages, err := m.messageService.List(c.Request.Context(), queueID, request.Label, request.Limit)
 	if err != nil {
@@ -116,7 +114,7 @@ func (m *MessageHandler) List(c *gin.Context) {
 		return
 	}
 
-	response := listResponse{Data: messages, Offset: request.Offset, Limit: request.Limit}
+	response := listResponse{Data: messages, Offset: 0, Limit: request.Limit}
 
 	c.JSON(http.StatusOK, response)
 }
