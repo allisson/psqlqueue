@@ -52,3 +52,12 @@ run-migration:
 create-mocks:
 	@rm -rf mocks
 	mockery --all
+
+.PHONY: swag-init
+swag-init:
+	swag init -g cmd/psqlqueue/main.go
+	swag fmt
+
+.PHONY: run-server
+run-server:
+	go run cmd/psqlqueue/main.go server

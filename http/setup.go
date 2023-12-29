@@ -1,0 +1,97 @@
+package http
+
+import (
+	"context"
+	"fmt"
+	"log/slog"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	sloggin "github.com/samber/slog-gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	docs "github.com/allisson/psqlqueue/docs"
+	"github.com/allisson/psqlqueue/domain"
+)
+
+func SetupRouter(logger *slog.Logger, queueHandler *QueueHandler, messageHandler *MessageHandler) *gin.Engine {
+	// router setup
+	gin.SetMode(gin.ReleaseMode)
+	router := gin.New()
+	router.Use(sloggin.New(logger), gin.Recovery())
+
+	// swagger config
+	docs.SwaggerInfo.Title = "PSQL Queue API"
+	docs.SwaggerInfo.BasePath = "/v1"
+
+	// v1 group setup
+	v1 := router.Group("/v1")
+
+	// swagger
+	v1.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+
+	// queue handler
+	v1.POST("/queues", queueHandler.Create)
+	v1.PUT("/queues/:queue_id", queueHandler.Update)
+	v1.GET("/queues/:queue_id", queueHandler.Get)
+	v1.GET("/queues", queueHandler.List)
+	v1.DELETE("/queues/:queue_id", queueHandler.Delete)
+	v1.GET("/queues/:queue_id/stats", queueHandler.Stats)
+	v1.PUT("/queues/:queue_id/purge", queueHandler.Purge)
+	v1.PUT("/queues/:queue_id/cleanup", queueHandler.Cleanup)
+
+	// message handler
+	v1.POST("/queues/:queue_id/messages", messageHandler.Create)
+	v1.GET("/queues/:queue_id/messages", messageHandler.List)
+	v1.PUT("/queues/:queue_id/messages/:message_id/ack", messageHandler.Ack)
+	v1.PUT("/queues/:queue_id/messages/:message_id/nack", messageHandler.Nack)
+
+	return router
+}
+
+// RunServer runs an HTTP server based on config and router.
+func RunServer(ctx context.Context, cfg *domain.Config, router *gin.Engine) {
+	// Create context that listens for the interrupt signal from the OS.
+	ctx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
+	srv := &http.Server{
+		Addr:              fmt.Sprintf("%s:%d", cfg.ServerHost, cfg.ServerPort),
+		Handler:           router,
+		ReadHeaderTimeout: time.Second * time.Duration(cfg.ServerReadHeaderTimeoutSeconds),
+	}
+
+	// Initializing the server in a goroutine so that
+	// it won't block the graceful shutdown handling below
+	go func() {
+		slog.Info("http server starting", "host", cfg.ServerHost, "port", cfg.ServerPort)
+
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			slog.Error("http server listen error", err)
+			os.Exit(1)
+		}
+	}()
+
+	// Listen for the interrupt signal.
+	<-ctx.Done()
+
+	// Restore default behavior on the interrupt signal and notify user of shutdown.
+	stop()
+	slog.Info("http server shutting down gracefully, press Ctrl+C again to force")
+
+	// The context is used to inform the server it has 5 seconds to finish
+	// the request it is currently handling
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		slog.Error("http server forced to shutdown: ", err)
+		os.Exit(1)
+	}
+
+	slog.Info("http server exiting")
+}
