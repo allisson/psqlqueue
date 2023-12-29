@@ -373,7 +373,7 @@ paths:
         name: queue_id
         required: true
         type: string
-      - description: Label
+      - description: Filter by label
         in: path
         name: label
         type: string

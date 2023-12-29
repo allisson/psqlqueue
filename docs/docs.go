@@ -348,7 +348,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Label",
+                        "description": "Filter by label",
                         "name": "label",
                         "in": "path"
                     },
