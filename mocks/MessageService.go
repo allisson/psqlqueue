@@ -51,7 +51,7 @@ func (_m *MessageService) Create(ctx context.Context, message *domain.Message) e
 }
 
 // List provides a mock function with given fields: ctx, queueID, label, limit
-func (_m *MessageService) List(ctx context.Context, queueID *string, label *string, limit uint) ([]*domain.Message, error) {
+func (_m *MessageService) List(ctx context.Context, queueID string, label *string, limit uint) ([]*domain.Message, error) {
 	ret := _m.Called(ctx, queueID, label, limit)
 
 	if len(ret) == 0 {
@@ -60,10 +60,10 @@ func (_m *MessageService) List(ctx context.Context, queueID *string, label *stri
 
 	var r0 []*domain.Message
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *string, *string, uint) ([]*domain.Message, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, *string, uint) ([]*domain.Message, error)); ok {
 		return rf(ctx, queueID, label, limit)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *string, *string, uint) []*domain.Message); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, *string, uint) []*domain.Message); ok {
 		r0 = rf(ctx, queueID, label, limit)
 	} else {
 		if ret.Get(0) != nil {
@@ -71,7 +71,7 @@ func (_m *MessageService) List(ctx context.Context, queueID *string, label *stri
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *string, *string, uint) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, string, *string, uint) error); ok {
 		r1 = rf(ctx, queueID, label, limit)
 	} else {
 		r1 = ret.Error(1)

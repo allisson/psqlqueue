@@ -1,0 +1,524 @@
+definitions:
+  ErrorResponse:
+    properties:
+      code:
+        $ref: '#/definitions/ErrorResponseCode'
+      details:
+        type: string
+      message:
+        type: string
+    type: object
+  ErrorResponseCode:
+    enum:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    type: integer
+    x-enum-varnames:
+    - internalServerErrorCode
+    - malformedRequest
+    - requestValidationFailedCode
+    - queueAlreadyExists
+    - queueNotFound
+    - messageNotFound
+  MessageListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/MessageResponse'
+        type: array
+      limit:
+        example: 10
+        type: integer
+    type: object
+  MessageNackRequest:
+    properties:
+      visibility_timeout_seconds:
+        type: integer
+    required:
+    - visibility_timeout_seconds
+    type: object
+  MessageRequest:
+    properties:
+      attributes:
+        additionalProperties:
+          type: string
+        type: object
+      body:
+        type: string
+      label:
+        type: string
+    required:
+    - body
+    type: object
+  MessageResponse:
+    properties:
+      attributes:
+        additionalProperties:
+          type: string
+        type: object
+      body:
+        type: string
+      created_at:
+        example: "2023-08-17T00:00:00Z"
+        type: string
+      delivery_attempts:
+        example: 1
+        type: integer
+      id:
+        example: 7b98fe50-affd-4685-bd7d-3ae5e41493af
+        type: string
+      label:
+        type: string
+      queue_id:
+        example: my-new-queue
+        type: string
+    type: object
+  QueueListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/QueueResponse'
+        type: array
+      limit:
+        example: 10
+        type: integer
+      offset:
+        example: 0
+        type: integer
+    type: object
+  QueueRequest:
+    properties:
+      ack_deadline_seconds:
+        example: 30
+        type: integer
+      delivery_delay_seconds:
+        example: 0
+        type: integer
+      id:
+        example: my-new-queue
+        type: string
+      message_retention_seconds:
+        example: 604800
+        type: integer
+    required:
+    - ack_deadline_seconds
+    - delivery_delay_seconds
+    - id
+    - message_retention_seconds
+    type: object
+  QueueResponse:
+    properties:
+      ack_deadline_seconds:
+        example: 30
+        type: integer
+      created_at:
+        example: "2023-08-17T00:00:00Z"
+        type: string
+      delivery_delay_seconds:
+        example: 0
+        type: integer
+      id:
+        example: my-new-queue
+        type: string
+      message_retention_seconds:
+        example: 604800
+        type: integer
+      updated_at:
+        example: "2023-08-17T00:00:00Z"
+        type: string
+    type: object
+  QueueStatsResponse:
+    properties:
+      num_undelivered_messages:
+        example: 1
+        type: integer
+      oldest_unacked_message_age_seconds:
+        example: 1
+        type: integer
+    type: object
+  QueueUpdateRequest:
+    properties:
+      ack_deadline_seconds:
+        example: 30
+        type: integer
+      delivery_delay_seconds:
+        example: 0
+        type: integer
+      message_retention_seconds:
+        example: 604800
+        type: integer
+    required:
+    - ack_deadline_seconds
+    - delivery_delay_seconds
+    - message_retention_seconds
+    type: object
+info:
+  contact: {}
+paths:
+  /queue/{queue_id}/messages:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Queue id
+        in: path
+        name: queue_id
+        required: true
+        type: string
+      - description: Add a message
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/MessageRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Add a message
+      tags:
+      - messages
+  /queues:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: The limit indicates the maximum number of items to return
+        in: query
+        name: limit
+        type: integer
+      - description: The offset indicates the starting position of the query in relation
+          to the complete set of unpaginated items
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/QueueListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: List queues
+      tags:
+      - queues
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Add a queue
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/QueueRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/QueueResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Add a queue
+      tags:
+      - queues
+  /queues/{queue_id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Queue id
+        in: path
+        name: queue_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Delete a queue
+      tags:
+      - queues
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Queue id
+        in: path
+        name: queue_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/QueueResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Show a queue
+      tags:
+      - queues
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Queue id
+        in: path
+        name: queue_id
+        required: true
+        type: string
+      - description: Update a queue
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/QueueUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/QueueResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Update a queue
+      tags:
+      - queues
+  /queues/{queue_id}/cleanup:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Queue id
+        in: path
+        name: queue_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Cleanup a queue removing expired and acked messages
+      tags:
+      - queues
+  /queues/{queue_id}/messages:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Queue id
+        in: path
+        name: queue_id
+        required: true
+        type: string
+      - description: Label
+        in: path
+        name: label
+        type: string
+      - description: The limit indicates the maximum number of items to return
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/MessageListResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: List messages
+      tags:
+      - messages
+  /queues/{queue_id}/messages/{message_id}/ack:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Queue id
+        in: path
+        name: queue_id
+        required: true
+        type: string
+      - description: Message id
+        in: path
+        name: message_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Ack a message
+      tags:
+      - messages
+  /queues/{queue_id}/messages/{message_id}/nack:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Queue id
+        in: path
+        name: queue_id
+        required: true
+        type: string
+      - description: Message id
+        in: path
+        name: message_id
+        required: true
+        type: string
+      - description: Nack a message
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/MessageNackRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Nack a message
+      tags:
+      - messages
+  /queues/{queue_id}/purge:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Queue id
+        in: path
+        name: queue_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Purge a queue
+      tags:
+      - queues
+  /queues/{queue_id}/stats:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Queue id
+        in: path
+        name: queue_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/QueueStatsResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Get the queue stats
+      tags:
+      - queues
+swagger: "2.0"
