@@ -209,7 +209,7 @@ curl --location 'http://localhost:8000/v1/topics' \
 
 Now we will create two new queues:
 - "all-orders": For receiving all messages from the orders topic.
-- "processed-orders": For receiving only the messages with the `status` attribute equals to `"processed"`.
+- "processed-orders": For receiving only the messages with the `status` attribute equal to `"processed"`.
 
 ```bash
 curl --location 'http://localhost:8000/v1/queues' \
