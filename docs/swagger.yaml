@@ -16,6 +16,10 @@ definitions:
     - 4
     - 5
     - 6
+    - 7
+    - 8
+    - 9
+    - 10
     type: integer
     x-enum-varnames:
     - internalServerErrorCode
@@ -24,6 +28,10 @@ definitions:
     - queueAlreadyExists
     - queueNotFound
     - messageNotFound
+    - topicAlreadyExists
+    - topicNotFound
+    - subscriptionAlreadyExists
+    - subscriptionNotFound
   MessageListResponse:
     properties:
       data:
@@ -81,7 +89,7 @@ definitions:
     properties:
       data:
         items:
-          $ref: '#/definitions/QueueResponse'
+          $ref: '#/definitions/TopicResponse'
         type: array
       limit:
         example: 10
@@ -155,6 +163,79 @@ definitions:
     - ack_deadline_seconds
     - delivery_delay_seconds
     - message_retention_seconds
+    type: object
+  SubscriptionListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/TopicResponse'
+        type: array
+      limit:
+        example: 10
+        type: integer
+      offset:
+        example: 0
+        type: integer
+    type: object
+  SubscriptionRequest:
+    properties:
+      id:
+        example: my-new-subscription
+        type: string
+      message_filters:
+        additionalProperties:
+          items:
+            type: string
+          type: array
+        type: object
+      queue_id:
+        example: my-new-queue
+        type: string
+      topic_id:
+        example: my-new-topic
+        type: string
+    required:
+    - id
+    - queue_id
+    - topic_id
+    type: object
+  SubscriptionResponse:
+    properties:
+      created_at:
+        example: "2023-08-17T00:00:00Z"
+        type: string
+      id:
+        example: my-new-subscription
+        type: string
+      message_filters:
+        additionalProperties:
+          items:
+            type: string
+          type: array
+        type: object
+      queue_id:
+        example: my-new-queue
+        type: string
+      topic_id:
+        example: my-new-topic
+        type: string
+    type: object
+  TopicRequest:
+    properties:
+      id:
+        example: my-new-topic
+        type: string
+    required:
+    - id
+    type: object
+  TopicResponse:
+    properties:
+      created_at:
+        example: "2023-08-17T00:00:00Z"
+        type: string
+      id:
+        example: my-new-topic
+        type: string
     type: object
 info:
   contact: {}
@@ -521,4 +602,251 @@ paths:
       summary: Get the queue stats
       tags:
       - queues
+  /subscriptions:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: The limit indicates the maximum number of items to return
+        in: query
+        name: limit
+        type: integer
+      - description: The offset indicates the starting position of the query in relation
+          to the complete set of unpaginated items
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/SubscriptionListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: List subscriptions
+      tags:
+      - subscriptions
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Add a subscription
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/SubscriptionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/TopicResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Add a subscription
+      tags:
+      - subscriptions
+  /subscriptions/{subscription_id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Subscription id
+        in: path
+        name: subscription_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Delete a subscription
+      tags:
+      - subscriptions
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Subscription id
+        in: path
+        name: subscription_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/SubscriptionResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Show a subscription
+      tags:
+      - subscriptions
+  /topics:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: The limit indicates the maximum number of items to return
+        in: query
+        name: limit
+        type: integer
+      - description: The offset indicates the starting position of the query in relation
+          to the complete set of unpaginated items
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/QueueListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: List topics
+      tags:
+      - topics
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Add a topic
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/TopicRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/TopicResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Add a topic
+      tags:
+      - topics
+  /topics/{topic_id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Topic id
+        in: path
+        name: topic_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Delete a topic
+      tags:
+      - topics
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Topic id
+        in: path
+        name: topic_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/TopicResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Show a topic
+      tags:
+      - topics
+  /topics/{topic_id}/messages:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Add a message
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/MessageRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/TopicResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Add a message
+      tags:
+      - topics
 swagger: "2.0"

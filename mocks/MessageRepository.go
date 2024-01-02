@@ -50,6 +50,24 @@ func (_m *MessageRepository) Create(ctx context.Context, message *domain.Message
 	return r0
 }
 
+// CreateMany provides a mock function with given fields: ctx, messages
+func (_m *MessageRepository) CreateMany(ctx context.Context, messages []*domain.Message) error {
+	ret := _m.Called(ctx, messages)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateMany")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, []*domain.Message) error); ok {
+		r0 = rf(ctx, messages)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Get provides a mock function with given fields: ctx, id
 func (_m *MessageRepository) Get(ctx context.Context, id string) (*domain.Message, error) {
 	ret := _m.Called(ctx, id)

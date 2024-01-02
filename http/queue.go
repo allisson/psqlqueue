@@ -155,7 +155,7 @@ func (q *QueueHandler) Get(c *gin.Context) {
 func (q *QueueHandler) List(c *gin.Context) {
 	request := newListRequestFromGIN(c)
 
-	queues, err := q.queueService.List(c.Request.Context(), int(request.Offset), int(request.Limit))
+	queues, err := q.queueService.List(c.Request.Context(), request.Offset, request.Limit)
 	if err != nil {
 		er := parseServiceError("queueService", "List", err)
 		c.JSON(er.StatusCode, &er)

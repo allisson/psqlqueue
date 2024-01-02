@@ -18,7 +18,7 @@ func nilString() *string {
 	return s
 }
 
-func TestMessage(t *testing.T) {
+func TestMessageHandler(t *testing.T) {
 	t.Run("Create with invalid request", func(t *testing.T) {
 		expectedPayload := `{"code":2,"message":"malformed request body"}`
 		tc := makeTestContext(t)

@@ -44,7 +44,7 @@ func (q *Queue) Get(ctx context.Context, id string) (*domain.Queue, error) {
 	return q.queueRepository.Get(ctx, id)
 }
 
-func (q *Queue) List(ctx context.Context, offset, limit int) ([]*domain.Queue, error) {
+func (q *Queue) List(ctx context.Context, offset, limit uint) ([]*domain.Queue, error) {
 	return q.queueRepository.List(ctx, offset, limit)
 }
 

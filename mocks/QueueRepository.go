@@ -99,7 +99,7 @@ func (_m *QueueRepository) Get(ctx context.Context, id string) (*domain.Queue, e
 }
 
 // List provides a mock function with given fields: ctx, offset, limit
-func (_m *QueueRepository) List(ctx context.Context, offset int, limit int) ([]*domain.Queue, error) {
+func (_m *QueueRepository) List(ctx context.Context, offset uint, limit uint) ([]*domain.Queue, error) {
 	ret := _m.Called(ctx, offset, limit)
 
 	if len(ret) == 0 {
@@ -108,10 +108,10 @@ func (_m *QueueRepository) List(ctx context.Context, offset int, limit int) ([]*
 
 	var r0 []*domain.Queue
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, int, int) ([]*domain.Queue, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uint, uint) ([]*domain.Queue, error)); ok {
 		return rf(ctx, offset, limit)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, int, int) []*domain.Queue); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uint, uint) []*domain.Queue); ok {
 		r0 = rf(ctx, offset, limit)
 	} else {
 		if ret.Get(0) != nil {
@@ -119,7 +119,7 @@ func (_m *QueueRepository) List(ctx context.Context, offset int, limit int) ([]*
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, int, int) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, uint, uint) error); ok {
 		r1 = rf(ctx, offset, limit)
 	} else {
 		r1 = ret.Error(1)
