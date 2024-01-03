@@ -51,6 +51,8 @@ type Config struct {
 	ServerHost                     string
 	ServerPort                     uint
 	ServerReadHeaderTimeoutSeconds uint
+	MetricsHost                    string
+	MetricsPort                    uint
 	DatabaseURL                    string
 	TestDatabaseURL                string
 	DatabaseMinConns               uint
@@ -68,6 +70,8 @@ func NewConfig() *Config {
 		ServerHost:                     env.GetString("PSQLQUEUE_SERVER_HOST", "0.0.0.0"),
 		ServerPort:                     env.GetUint("PSQLQUEUE_SERVER_PORT", 8000),
 		ServerReadHeaderTimeoutSeconds: env.GetUint("PSQLQUEUE_SERVER_READ_HEADER_TIMEOUT_SECONDS", 60),
+		MetricsHost:                    env.GetString("PSQLQUEUE_METRICS_HOST", "0.0.0.0"),
+		MetricsPort:                    env.GetUint("PSQLQUEUE_METRICS_PORT", 9090),
 		DatabaseURL:                    env.GetString("PSQLQUEUE_DATABASE_URL", ""),
 		TestDatabaseURL:                env.GetString("PSQLQUEUE_TEST_DATABASE_URL", ""),
 		DatabaseMinConns:               env.GetUint("PSQLQUEUE_DATABASE_MIN_CONNS", 0),
