@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/allisson/psqlqueue/compare/v0.1.0...v0.2.0) (2024-01-03)
+
+
+### Features
+
+* add pub/sub support ([#8](https://github.com/allisson/psqlqueue/issues/8)) ([526d733](https://github.com/allisson/psqlqueue/commit/526d733acaf94cbbe20c2727f0c1bb5d3674eb89))
+
 ## 0.1.0 (2023-12-29)
 
 
