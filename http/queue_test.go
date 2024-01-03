@@ -24,6 +24,8 @@ type testContext struct {
 	topicHandler        *TopicHandler
 	subscriptionService *mocks.SubscriptionService
 	subscriptionHandler *SubscriptionHandler
+	healthCheckService  *mocks.HealthCheckService
+	healthCheckHandler  *HealthCheckHandler
 	router              *gin.Engine
 }
 
@@ -37,7 +39,9 @@ func makeTestContext(t *testing.T) *testContext {
 	topicHandler := NewTopicHandler(topicService)
 	subscriptionService := mocks.NewSubscriptionService(t)
 	subscriptionHandler := NewSubscriptionHandler(subscriptionService)
-	router := SetupRouter(logger, queueHandler, messageHandler, topicHandler, subscriptionHandler)
+	healthCheckService := mocks.NewHealthCheckService(t)
+	healthCheckHandler := NewHealthCheckHandler(healthCheckService)
+	router := SetupRouter(logger, queueHandler, messageHandler, topicHandler, subscriptionHandler, healthCheckHandler)
 	return &testContext{
 		queueService:        queueService,
 		queueHandler:        queueHandler,
@@ -47,6 +51,8 @@ func makeTestContext(t *testing.T) *testContext {
 		topicHandler:        topicHandler,
 		subscriptionService: subscriptionService,
 		subscriptionHandler: subscriptionHandler,
+		healthCheckService:  healthCheckService,
+		healthCheckHandler:  healthCheckHandler,
 		router:              router,
 	}
 }
