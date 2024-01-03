@@ -398,3 +398,7 @@ curl --location 'http://localhost:8000/v1/queues/processed-orders/messages'
 ```
 
 As expected, this queue has only one message that was published with the `status` attribute equal to `"processed"`.
+
+## Prometheus metrics
+
+The Prometheus metrics can be accessed at http://localhost:9090.
