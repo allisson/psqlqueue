@@ -19,7 +19,7 @@ import (
 	"github.com/allisson/psqlqueue/domain"
 )
 
-func SetupRouter(logger *slog.Logger, queueHandler *QueueHandler, messageHandler *MessageHandler, topicHandler *TopicHandler, subscriptionHandler *SubscriptionHandler) *gin.Engine {
+func SetupRouter(logger *slog.Logger, queueHandler *QueueHandler, messageHandler *MessageHandler, topicHandler *TopicHandler, subscriptionHandler *SubscriptionHandler, healthCheckHandler *HealthCheckHandler) *gin.Engine {
 	// router setup
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
@@ -63,6 +63,9 @@ func SetupRouter(logger *slog.Logger, queueHandler *QueueHandler, messageHandler
 	v1.GET("/subscriptions/:subscription_id", subscriptionHandler.Get)
 	v1.GET("/subscriptions", subscriptionHandler.List)
 	v1.DELETE("/subscriptions/:subscription_id", subscriptionHandler.Delete)
+
+	// health check handler
+	v1.GET("/healthz", healthCheckHandler.Check)
 
 	return router
 }

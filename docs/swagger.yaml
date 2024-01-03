@@ -32,6 +32,11 @@ definitions:
     - topicNotFound
     - subscriptionAlreadyExists
     - subscriptionNotFound
+  HealthCheckResponse:
+    properties:
+      success:
+        type: boolean
+    type: object
   MessageListResponse:
     properties:
       data:
@@ -240,6 +245,24 @@ definitions:
 info:
   contact: {}
 paths:
+  /healthz:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/HealthCheckResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Execute a health check
+      tags:
+      - health-check
   /queue/{queue_id}/messages:
     post:
       consumes:
