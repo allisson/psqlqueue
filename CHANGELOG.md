@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/allisson/psqlqueue/compare/v0.3.0...v0.4.0) (2024-01-03)
+
+
+### Features
+
+* add prometheus metrics ([#12](https://github.com/allisson/psqlqueue/issues/12)) ([473c399](https://github.com/allisson/psqlqueue/commit/473c399ba45ec8e7132a2a085b8658ad5dadad52))
+
 ## [0.3.0](https://github.com/allisson/psqlqueue/compare/v0.2.0...v0.3.0) (2024-01-03)
 
 
