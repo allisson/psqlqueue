@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/allisson/psqlqueue/compare/v0.2.0...v0.3.0) (2024-01-03)
+
+
+### Features
+
+* add a health check endpoint ([#10](https://github.com/allisson/psqlqueue/issues/10)) ([2769c70](https://github.com/allisson/psqlqueue/commit/2769c70bd316f1f04e1033b37b3c4d422fe6a0a2))
+
 ## [0.2.0](https://github.com/allisson/psqlqueue/compare/v0.1.0...v0.2.0) (2024-01-03)
 
 
