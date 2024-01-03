@@ -16,6 +16,24 @@ type Message struct {
 	tableName string
 }
 
+func (m *Message) CreateMany(ctx context.Context, messages []*domain.Message) error {
+	tx, err := m.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+
+	for i := range messages {
+		message := messages[i]
+
+		if err := pgxutil.Insert(ctx, tx, "", m.tableName, message); err != nil {
+			executeRollback(ctx, tx)
+			return parseError(err, domain.ErrMessageNotFound, domain.ErrMessageAlreadyExists)
+		}
+	}
+
+	return tx.Commit(ctx)
+}
+
 func (m *Message) Create(ctx context.Context, message *domain.Message) error {
 	return parseError(pgxutil.Insert(ctx, m.pool, "", m.tableName, message), domain.ErrMessageNotFound, domain.ErrMessageAlreadyExists)
 }

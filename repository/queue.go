@@ -33,9 +33,9 @@ func (q *Queue) Get(ctx context.Context, id string) (*domain.Queue, error) {
 	return &queue, parseError(err, domain.ErrQueueNotFound, domain.ErrQueueAlreadyExists)
 }
 
-func (q *Queue) List(ctx context.Context, offset, limit int) ([]*domain.Queue, error) {
+func (q *Queue) List(ctx context.Context, offset, limit uint) ([]*domain.Queue, error) {
 	queues := []*domain.Queue{}
-	options := pgxutil.NewFindAllOptions().WithOffset(offset).WithLimit(limit).WithOrderBy("id asc")
+	options := pgxutil.NewFindAllOptions().WithOffset(int(offset)).WithLimit(int(limit)).WithOrderBy("id asc")
 	err := pgxutil.Select(ctx, q.pool, q.tableName, options, &queues)
 	return queues, parseError(err, domain.ErrQueueNotFound, domain.ErrQueueAlreadyExists)
 }
@@ -74,7 +74,7 @@ func (q *Queue) Stats(ctx context.Context, id string) (*domain.QueueStats, error
 		return stats, err
 	}
 	if !createdAt.IsZero() {
-		stats.OldestUnackedMessageAgeSeconds = int(now.Sub(createdAt).Seconds())
+		stats.OldestUnackedMessageAgeSeconds = uint(now.Sub(createdAt).Seconds())
 	}
 
 	return stats, nil

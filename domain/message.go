@@ -61,6 +61,7 @@ func (m *Message) Nack(now time.Time, visibilityTimeoutSeconds uint) {
 
 // MessageRepository is the repository interface for the Message entity.
 type MessageRepository interface {
+	CreateMany(ctx context.Context, messages []*Message) error
 	Create(ctx context.Context, message *Message) error
 	Get(ctx context.Context, id string) (*Message, error)
 	List(ctx context.Context, queue *Queue, label *string, limit uint) ([]*Message, error)

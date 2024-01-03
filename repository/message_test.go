@@ -29,6 +29,28 @@ func TestMessage(t *testing.T) {
 	pool, _ := pgxpool.New(ctx, cfg.TestDatabaseURL)
 	defer pool.Close()
 
+	t.Run("CreateMany", func(t *testing.T) {
+		defer clearDatabase(t, ctx, pool)
+
+		now := time.Now().UTC()
+		queue := makeQueue("my-queue")
+		message1 := makeMessage(queue.ID)
+		message1.Enqueue(queue, now)
+		message2 := makeMessage(queue.ID)
+		message2.Enqueue(queue, now)
+		queueRepo := NewQueue(pool)
+		messageRepo := NewMessage(pool)
+
+		err := queueRepo.Create(ctx, queue)
+		assert.Nil(t, err)
+
+		err = messageRepo.CreateMany(ctx, []*domain.Message{message1, message2})
+		assert.Nil(t, err)
+
+		err = messageRepo.CreateMany(ctx, []*domain.Message{message1, message2})
+		assert.ErrorIs(t, err, domain.ErrMessageAlreadyExists)
+	})
+
 	t.Run("Create", func(t *testing.T) {
 		defer clearDatabase(t, ctx, pool)
 

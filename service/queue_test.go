@@ -12,7 +12,7 @@ import (
 	"github.com/allisson/psqlqueue/mocks"
 )
 
-func makeQueue(queueID string, topicID *string) *domain.Queue {
+func makeQueue(queueID string) *domain.Queue {
 	return &domain.Queue{
 		ID:                      queueID,
 		AckDeadlineSeconds:      60,
@@ -29,7 +29,7 @@ func TestQueue(t *testing.T) {
 	t.Run("Create", func(t *testing.T) {
 		queueRepository := mocks.NewQueueRepository(t)
 		queueService := NewQueue(queueRepository)
-		queue := makeQueue("my-queue", nil)
+		queue := makeQueue("my-queue")
 
 		queueRepository.On("Create", ctx, queue).Return(nil)
 
@@ -41,7 +41,7 @@ func TestQueue(t *testing.T) {
 		expectedErrorPayload := `{"id":"must be in a valid format"}`
 		queueRepository := mocks.NewQueueRepository(t)
 		queueService := NewQueue(queueRepository)
-		queue := makeQueue("my@queue", nil)
+		queue := makeQueue("my@queue")
 
 		err := queueService.Create(ctx, queue)
 		assert.NotNil(t, err)
@@ -53,7 +53,7 @@ func TestQueue(t *testing.T) {
 	t.Run("Update", func(t *testing.T) {
 		queueRepository := mocks.NewQueueRepository(t)
 		queueService := NewQueue(queueRepository)
-		queue := makeQueue("my-queue", nil)
+		queue := makeQueue("my-queue")
 
 		queueRepository.On("Get", ctx, queue.ID).Return(queue, nil)
 		queueRepository.On("Update", ctx, queue).Return(nil)
@@ -65,7 +65,7 @@ func TestQueue(t *testing.T) {
 	t.Run("Get", func(t *testing.T) {
 		queueRepository := mocks.NewQueueRepository(t)
 		queueService := NewQueue(queueRepository)
-		queue := makeQueue("my-queue", nil)
+		queue := makeQueue("my-queue")
 
 		queueRepository.On("Get", ctx, queue.ID).Return(queue, nil)
 
@@ -76,10 +76,10 @@ func TestQueue(t *testing.T) {
 	t.Run("List", func(t *testing.T) {
 		queueRepository := mocks.NewQueueRepository(t)
 		queueService := NewQueue(queueRepository)
-		queue1 := makeQueue("my-queue-1", nil)
-		queue2 := makeQueue("my-queue-2", nil)
+		queue1 := makeQueue("my-queue-1")
+		queue2 := makeQueue("my-queue-2")
 
-		queueRepository.On("List", ctx, 0, 10).Return([]*domain.Queue{queue1, queue2}, nil)
+		queueRepository.On("List", ctx, uint(0), uint(10)).Return([]*domain.Queue{queue1, queue2}, nil)
 
 		queues, err := queueService.List(ctx, 0, 10)
 		assert.Nil(t, err)
@@ -89,7 +89,7 @@ func TestQueue(t *testing.T) {
 	t.Run("Delete", func(t *testing.T) {
 		queueRepository := mocks.NewQueueRepository(t)
 		queueService := NewQueue(queueRepository)
-		queue := makeQueue("my-queue", nil)
+		queue := makeQueue("my-queue")
 
 		queueRepository.On("Get", ctx, queue.ID).Return(queue, nil)
 		queueRepository.On("Delete", ctx, queue.ID).Return(nil)
@@ -101,7 +101,7 @@ func TestQueue(t *testing.T) {
 	t.Run("Stats", func(t *testing.T) {
 		queueRepository := mocks.NewQueueRepository(t)
 		queueService := NewQueue(queueRepository)
-		queue := makeQueue("my-queue", nil)
+		queue := makeQueue("my-queue")
 
 		queueRepository.On("Get", ctx, queue.ID).Return(queue, nil)
 		queueRepository.On("Stats", ctx, queue.ID).Return(&domain.QueueStats{}, nil)
@@ -113,7 +113,7 @@ func TestQueue(t *testing.T) {
 	t.Run("Purge", func(t *testing.T) {
 		queueRepository := mocks.NewQueueRepository(t)
 		queueService := NewQueue(queueRepository)
-		queue := makeQueue("my-queue", nil)
+		queue := makeQueue("my-queue")
 
 		queueRepository.On("Get", ctx, queue.ID).Return(queue, nil)
 		queueRepository.On("Purge", ctx, queue.ID).Return(nil)

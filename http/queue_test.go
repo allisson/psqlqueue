@@ -16,11 +16,15 @@ import (
 )
 
 type testContext struct {
-	queueService   *mocks.QueueService
-	queueHandler   *QueueHandler
-	messageService *mocks.MessageService
-	messageHandler *MessageHandler
-	router         *gin.Engine
+	queueService        *mocks.QueueService
+	queueHandler        *QueueHandler
+	messageService      *mocks.MessageService
+	messageHandler      *MessageHandler
+	topicService        *mocks.TopicService
+	topicHandler        *TopicHandler
+	subscriptionService *mocks.SubscriptionService
+	subscriptionHandler *SubscriptionHandler
+	router              *gin.Engine
 }
 
 func makeTestContext(t *testing.T) *testContext {
@@ -29,17 +33,25 @@ func makeTestContext(t *testing.T) *testContext {
 	queueHandler := NewQueueHandler(queueService)
 	messageService := mocks.NewMessageService(t)
 	messageHandler := NewMessageHandler(messageService)
-	router := SetupRouter(logger, queueHandler, messageHandler)
+	topicService := mocks.NewTopicService(t)
+	topicHandler := NewTopicHandler(topicService)
+	subscriptionService := mocks.NewSubscriptionService(t)
+	subscriptionHandler := NewSubscriptionHandler(subscriptionService)
+	router := SetupRouter(logger, queueHandler, messageHandler, topicHandler, subscriptionHandler)
 	return &testContext{
-		queueService:   queueService,
-		queueHandler:   queueHandler,
-		messageService: messageService,
-		messageHandler: messageHandler,
-		router:         router,
+		queueService:        queueService,
+		queueHandler:        queueHandler,
+		messageService:      messageService,
+		messageHandler:      messageHandler,
+		topicService:        topicService,
+		topicHandler:        topicHandler,
+		subscriptionService: subscriptionService,
+		subscriptionHandler: subscriptionHandler,
+		router:              router,
 	}
 }
 
-func TestQueue(t *testing.T) {
+func TestQueueHandler(t *testing.T) {
 	t.Run("Create with invalid request", func(t *testing.T) {
 		expectedPayload := `{"code":2,"message":"malformed request body"}`
 		tc := makeTestContext(t)
@@ -159,7 +171,7 @@ func TestQueue(t *testing.T) {
 		reqRec := httptest.NewRecorder()
 		req, _ := http.NewRequest("GET", "/v1/queues", nil)
 
-		tc.queueService.On("List", mock.Anything, 0, 1).Return([]*domain.Queue{&queue1, &queue2}, nil)
+		tc.queueService.On("List", mock.Anything, uint(0), uint(1)).Return([]*domain.Queue{&queue1, &queue2}, nil)
 		tc.router.ServeHTTP(reqRec, req)
 
 		assert.Equal(t, http.StatusOK, reqRec.Code)

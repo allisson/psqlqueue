@@ -14,7 +14,7 @@ import (
 func clearDatabase(t *testing.T, ctx context.Context, pool *pgxpool.Pool) {
 	sqlQuery := `
 	DELETE FROM queues;
-	DELETE FROM messages;
+	DELETE FROM topics;
 	`
 	_, err := pool.Exec(ctx, sqlQuery)
 	assert.Nil(t, err)
@@ -141,8 +141,8 @@ func TestQueue(t *testing.T) {
 
 		stats, err := queueRepo.Stats(ctx, queue.ID)
 		assert.Nil(t, err)
-		assert.Equal(t, 1, stats.NumUndeliveredMessages)
-		assert.Equal(t, 1, stats.OldestUnackedMessageAgeSeconds)
+		assert.Equal(t, uint(1), stats.NumUndeliveredMessages)
+		assert.Equal(t, uint(1), stats.OldestUnackedMessageAgeSeconds)
 	})
 
 	t.Run("Purge", func(t *testing.T) {
@@ -166,8 +166,8 @@ func TestQueue(t *testing.T) {
 
 		stats, err := queueRepo.Stats(ctx, queue.ID)
 		assert.Nil(t, err)
-		assert.Equal(t, 0, stats.NumUndeliveredMessages)
-		assert.Equal(t, 0, stats.OldestUnackedMessageAgeSeconds)
+		assert.Equal(t, uint(0), stats.NumUndeliveredMessages)
+		assert.Equal(t, uint(0), stats.OldestUnackedMessageAgeSeconds)
 	})
 
 	t.Run("Cleanup", func(t *testing.T) {

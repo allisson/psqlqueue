@@ -32,8 +32,8 @@ func (q Queue) Validate() error {
 
 // QueueStats entity.
 type QueueStats struct {
-	NumUndeliveredMessages         int `json:"num_undelivered_messages"`
-	OldestUnackedMessageAgeSeconds int `json:"oldest_unacked_message_age_seconds"`
+	NumUndeliveredMessages         uint `json:"num_undelivered_messages"`
+	OldestUnackedMessageAgeSeconds uint `json:"oldest_unacked_message_age_seconds"`
 }
 
 // QueueRepository is the repository interface for the Queue entity.
@@ -41,7 +41,7 @@ type QueueRepository interface {
 	Create(ctx context.Context, queue *Queue) error
 	Update(ctx context.Context, queue *Queue) error
 	Get(ctx context.Context, id string) (*Queue, error)
-	List(ctx context.Context, offset, limit int) ([]*Queue, error)
+	List(ctx context.Context, offset, limit uint) ([]*Queue, error)
 	Delete(ctx context.Context, id string) error
 	Stats(ctx context.Context, id string) (*QueueStats, error)
 	Purge(ctx context.Context, id string) error
@@ -53,7 +53,7 @@ type QueueService interface {
 	Create(ctx context.Context, queue *Queue) error
 	Update(ctx context.Context, queue *Queue) error
 	Get(ctx context.Context, id string) (*Queue, error)
-	List(ctx context.Context, offset, limit int) ([]*Queue, error)
+	List(ctx context.Context, offset, limit uint) ([]*Queue, error)
 	Delete(ctx context.Context, id string) error
 	Stats(ctx context.Context, id string) (*QueueStats, error)
 	Purge(ctx context.Context, id string) error

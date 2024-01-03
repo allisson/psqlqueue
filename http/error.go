@@ -18,6 +18,10 @@ const (
 	queueAlreadyExists
 	queueNotFound
 	messageNotFound
+	topicAlreadyExists
+	topicNotFound
+	subscriptionAlreadyExists
+	subscriptionNotFound
 )
 
 var errorResponses = map[string]errorResponse{
@@ -51,6 +55,26 @@ var errorResponses = map[string]errorResponse{
 		Message:    "message not found",
 		StatusCode: http.StatusNotFound,
 	},
+	"topic_already_exists": {
+		Code:       topicAlreadyExists,
+		Message:    "topic already exists",
+		StatusCode: http.StatusBadRequest,
+	},
+	"topic_not_found": {
+		Code:       topicNotFound,
+		Message:    "topic not found",
+		StatusCode: http.StatusNotFound,
+	},
+	"subscription_already_exists": {
+		Code:       subscriptionAlreadyExists,
+		Message:    "subscription already exists",
+		StatusCode: http.StatusBadRequest,
+	},
+	"subscription_not_found": {
+		Code:       subscriptionNotFound,
+		Message:    "subscription not found",
+		StatusCode: http.StatusNotFound,
+	},
 }
 
 type errorResponse struct {
@@ -74,6 +98,14 @@ func parseServiceError(serviceName, serviceMethod string, err error) errorRespon
 		return errorResponses["queue_not_found"]
 	case domain.ErrMessageNotFound:
 		return errorResponses["message_not_found"]
+	case domain.ErrTopicAlreadyExists:
+		return errorResponses["topic_already_exists"]
+	case domain.ErrTopicNotFound:
+		return errorResponses["topic_not_found"]
+	case domain.ErrSubscriptionAlreadyExists:
+		return errorResponses["subscription_already_exists"]
+	case domain.ErrSubscriptionNotFound:
+		return errorResponses["subscription_not_found"]
 	default:
 		slog.Error(serviceName, "method", serviceMethod, "error", err.Error())
 		return errorResponses["internal_server_error"]

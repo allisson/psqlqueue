@@ -24,7 +24,7 @@ func TestMessage(t *testing.T) {
 		messageRepository := mocks.NewMessageRepository(t)
 		queueRepository := mocks.NewQueueRepository(t)
 		messageService := NewMessage(messageRepository, queueRepository)
-		queue := makeQueue("my-queue", nil)
+		queue := makeQueue("my-queue")
 		message := domain.Message{Body: `{"data": true}`, QueueID: queue.ID}
 
 		queueRepository.On("Get", ctx, queue.ID).Return(queue, nil)
@@ -38,7 +38,7 @@ func TestMessage(t *testing.T) {
 		messageRepository := mocks.NewMessageRepository(t)
 		queueRepository := mocks.NewQueueRepository(t)
 		messageService := NewMessage(messageRepository, queueRepository)
-		queue := makeQueue("my-queue", nil)
+		queue := makeQueue("my-queue")
 		message1 := domain.Message{Body: `{"data": true}`}
 		message1.Enqueue(queue, time.Now().UTC())
 		message2 := domain.Message{Body: `{"data": true}`}
@@ -56,7 +56,7 @@ func TestMessage(t *testing.T) {
 		messageRepository := mocks.NewMessageRepository(t)
 		queueRepository := mocks.NewQueueRepository(t)
 		messageService := NewMessage(messageRepository, queueRepository)
-		queue := makeQueue("my-queue", nil)
+		queue := makeQueue("my-queue")
 		message := domain.Message{Body: `{"data": true}`}
 		message.Enqueue(queue, time.Now().UTC())
 
@@ -70,7 +70,7 @@ func TestMessage(t *testing.T) {
 		messageRepository := mocks.NewMessageRepository(t)
 		queueRepository := mocks.NewQueueRepository(t)
 		messageService := NewMessage(messageRepository, queueRepository)
-		queue := makeQueue("my-queue", nil)
+		queue := makeQueue("my-queue")
 		message := domain.Message{Body: `{"data": true}`}
 		message.Enqueue(queue, time.Now().UTC())
 

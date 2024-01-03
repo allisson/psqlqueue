@@ -5,7 +5,7 @@
 
 Simple queue system powered by Golang and PostgreSQL.
 
-## quickstart
+## Quickstart
 
 The idea of this service is to offer a simple queuing system using PostgreSQL as a backend.
 
@@ -20,6 +20,8 @@ docker run --name postgres-psqlqueue \
     -p 5432:5432 \
     -d postgres:15-alpine
 ```
+
+Before running anything, take a look at the possible environment variables that can be used with this service: https://github.com/allisson/psqlqueue/blob/main/env.sample
 
 Now let's run the database migrations before starting the server:
 
@@ -180,3 +182,219 @@ curl --location --request PUT 'http://localhost:8000/v1/queues/my-new-queue/clea
 ```
 
 This is the basics of using this service, I recommend that you check the swagger documentation at http://localhost:8000/v1/swagger/index.html to see more options.
+
+## Pub/Sub mode
+
+It's possible to use a Pub/Sub approach with the topics/subscriptions endpoints.
+
+For this example let's imagine an event system that processes orders, we will have a topic called `orders` and will push some messages into this topic.
+
+For creating a new topic we have these fields:
+- "id": The identifier of this new topic.
+
+```bash
+curl --location 'http://localhost:8000/v1/topics' \
+--header 'Content-Type: application/json' \
+--data '{
+    "id": "orders"
+}'
+```
+
+```json
+{
+    "id": "orders",
+    "created_at": "2024-01-02T22:20:43.351647Z"
+}
+```
+
+Now we will create two new queues:
+- "all-orders": For receiving all messages from the orders topic.
+- "processed-orders": For receiving only the messages with the `status` attribute equal to `"processed"`.
+
+```bash
+curl --location 'http://localhost:8000/v1/queues' \
+--header 'Content-Type: application/json' \
+--data '{
+    "id": "all-orders",
+    "ack_deadline_seconds": 30,
+    "message_retention_seconds": 1209600,
+    "delivery_delay_seconds": 0
+}'
+```
+
+```json
+{
+    "id": "all-orders",
+    "ack_deadline_seconds": 30,
+    "message_retention_seconds": 1209600,
+    "delivery_delay_seconds": 0,
+    "created_at": "2024-01-02T22:24:58.219593Z",
+    "updated_at": "2024-01-02T22:24:58.219593Z"
+}
+```
+
+```bash
+curl --location 'http://localhost:8000/v1/queues' \
+--header 'Content-Type: application/json' \
+--data '{
+    "id": "processed-orders",
+    "ack_deadline_seconds": 30,
+    "message_retention_seconds": 1209600,
+    "delivery_delay_seconds": 0
+}'
+```
+
+```json
+{
+    "id": "processed-orders",
+    "ack_deadline_seconds": 30,
+    "message_retention_seconds": 1209600,
+    "delivery_delay_seconds": 0,
+    "created_at": "2024-01-02T22:25:28.472891Z",
+    "updated_at": "2024-01-02T22:25:28.472891Z"
+}
+```
+
+Now we will create two subscriptions to link the topic with the queue.
+
+For creating a new subscription we have these fields:
+- "id": The identifier of this new subscription.
+- "topic_id": The id of the topic.
+- "queue_id": The id of the queue.
+- "message_filters": The filter for use with the message attributes.
+
+Creating the first subscription:
+
+```bash
+curl --location 'http://localhost:8000/v1/subscriptions' \
+--header 'Content-Type: application/json' \
+--data '{
+    "id": "orders-to-all-orders",
+    "topic_id": "orders",
+    "queue_id": "all-orders"
+}'
+```
+
+```json
+{
+    "id": "orders-to-all-orders",
+    "topic_id": "orders",
+    "queue_id": "all-orders",
+    "message_filters": null,
+    "created_at": "2024-01-02T22:30:12.628323Z"
+}
+```
+
+Now creating the second subscription, for this one we will use the message_filters field:
+
+```bash
+curl --location 'http://localhost:8000/v1/subscriptions' \
+--header 'Content-Type: application/json' \
+--data '{
+    "id": "orders-to-processed-orders",
+    "topic_id": "orders",
+    "queue_id": "processed-orders",
+    "message_filters": {"status": ["processed"]}
+}'
+```
+
+```json
+{
+    "id": "orders-to-processed-orders",
+    "topic_id": "orders",
+    "queue_id": "processed-orders",
+    "message_filters": {
+        "status": [
+            "processed"
+        ]
+    },
+    "created_at": "2024-01-02T22:31:26.156692Z"
+}
+```
+
+Now it's time to publish the first message:
+
+```bash
+curl --location 'http://localhost:8000/v1/topics/orders/messages' \
+--header 'Content-Type: application/json' \
+--data '{
+    "body": "body-of-the-order",
+    "attributes": {"status": "created"}
+}'
+```
+
+And the second message:
+
+```bash
+curl --location 'http://localhost:8000/v1/topics/orders/messages' \
+--header 'Content-Type: application/json' \
+--data '{
+    "body": "body-of-the-order",
+    "attributes": {"status": "processed"}
+}'
+```
+
+Now we will consume the `all-orders` queue:
+
+```bash
+curl --location 'http://localhost:8000/v1/queues/all-orders/messages'
+```
+
+```json
+{
+    "data": [
+        {
+            "id": "01HK651Q52EZMPKBYZGVK0ZX8S",
+            "queue_id": "all-orders",
+            "label": null,
+            "body": "body-of-the-order",
+            "attributes": {
+                "status": "created"
+            },
+            "delivery_attempts": 1,
+            "created_at": "2024-01-02T19:35:00.635625-03:00"
+        },
+        {
+            "id": "01HK652W2HNW53XWV4QBT5MAJY",
+            "queue_id": "all-orders",
+            "label": null,
+            "body": "body-of-the-order",
+            "attributes": {
+                "status": "processed"
+            },
+            "delivery_attempts": 1,
+            "created_at": "2024-01-02T19:35:38.446759-03:00"
+        }
+    ],
+    "limit": 10
+}
+```
+
+As expected, this queue has the two published messages.
+
+Now we will consume the `processed-orders` queue:
+
+```bash
+curl --location 'http://localhost:8000/v1/queues/processed-orders/messages'
+```
+
+```json
+{
+    "data": [
+        {
+            "id": "01HK652W2JK8MPN3JDXY9RATS5",
+            "queue_id": "processed-orders",
+            "label": null,
+            "body": "body-of-the-order",
+            "attributes": {
+                "status": "processed"
+            },
+            "delivery_attempts": 1,
+            "created_at": "2024-01-02T19:35:38.446759-03:00"
+        }
+    ],
+    "limit": 10
+}
+```
+
+As expected, this queue has only one message that was published with the `status` attribute equal to `"processed"`.

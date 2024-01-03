@@ -45,17 +45,23 @@ func main() {
 					// repositories
 					queueRepository := repository.NewQueue(pool)
 					messageRepository := repository.NewMessage(pool)
+					topicRepository := repository.NewTopic(pool)
+					subscriptionRepository := repository.NewSubscription(pool)
 
 					// services
 					queueService := service.NewQueue(queueRepository)
 					messageService := service.NewMessage(messageRepository, queueRepository)
+					topicService := service.NewTopic(topicRepository, subscriptionRepository, queueRepository, messageRepository)
+					subscriptionService := service.NewSubscription(subscriptionRepository)
 
 					// http handlers
 					queueHandler := http.NewQueueHandler(queueService)
 					messageHandler := http.NewMessageHandler(messageService)
+					topicHandler := http.NewTopicHandler(topicService)
+					subscriptionHandler := http.NewSubscriptionHandler(subscriptionService)
 
 					// run http server
-					http.RunServer(c.Context, cfg, http.SetupRouter(logger, queueHandler, messageHandler))
+					http.RunServer(c.Context, cfg, http.SetupRouter(logger, queueHandler, messageHandler, topicHandler, subscriptionHandler))
 
 					return nil
 				},
