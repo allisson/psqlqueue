@@ -103,7 +103,7 @@ func RunServer(ctx context.Context, cfg *domain.Config, router *gin.Engine) {
 		slog.Info("metrics server starting", "host", cfg.MetricsHost, "port", cfg.MetricsPort)
 
 		if err := metricsSrv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			slog.Error("metrics server listen error", err)
+			slog.Error("metrics server listen error", slog.Any("error", err))
 			os.Exit(1)
 		}
 	}()
@@ -114,7 +114,7 @@ func RunServer(ctx context.Context, cfg *domain.Config, router *gin.Engine) {
 		slog.Info("http server starting", "host", cfg.ServerHost, "port", cfg.ServerPort)
 
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			slog.Error("http server listen error", err)
+			slog.Error("http server listen error", slog.Any("error", err))
 			os.Exit(1)
 		}
 	}()
@@ -131,11 +131,11 @@ func RunServer(ctx context.Context, cfg *domain.Config, router *gin.Engine) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := metricsSrv.Shutdown(ctx); err != nil {
-		slog.Error("metrics server forced to shutdown: ", err)
+		slog.Error("metrics server forced to shutdown: ", slog.Any("error", err))
 		os.Exit(1)
 	}
 	if err := srv.Shutdown(ctx); err != nil {
-		slog.Error("http server forced to shutdown: ", err)
+		slog.Error("http server forced to shutdown: ", slog.Any("error", err))
 		os.Exit(1)
 	}
 
