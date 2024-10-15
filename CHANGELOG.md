@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/allisson/psqlqueue/compare/v0.4.0...v0.4.1) (2024-10-15)
+
+
+### Bug Fixes
+
+* update dependencies ([#14](https://github.com/allisson/psqlqueue/issues/14)) ([8d5e706](https://github.com/allisson/psqlqueue/commit/8d5e70676b300345f81a2215ddf9001aae8de405))
+
 ## [0.4.0](https://github.com/allisson/psqlqueue/compare/v0.3.0...v0.4.0) (2024-01-03)
 
 
