@@ -91,7 +91,6 @@ func TestQueue(t *testing.T) {
 		queueService := NewQueue(queueRepository)
 		queue := makeQueue("my-queue")
 
-		queueRepository.On("Get", ctx, queue.ID).Return(queue, nil)
 		queueRepository.On("Delete", ctx, queue.ID).Return(nil)
 
 		err := queueService.Delete(ctx, queue.ID)
@@ -103,7 +102,6 @@ func TestQueue(t *testing.T) {
 		queueService := NewQueue(queueRepository)
 		queue := makeQueue("my-queue")
 
-		queueRepository.On("Get", ctx, queue.ID).Return(queue, nil)
 		queueRepository.On("Stats", ctx, queue.ID).Return(&domain.QueueStats{}, nil)
 
 		_, err := queueService.Stats(ctx, queue.ID)
@@ -115,7 +113,6 @@ func TestQueue(t *testing.T) {
 		queueService := NewQueue(queueRepository)
 		queue := makeQueue("my-queue")
 
-		queueRepository.On("Get", ctx, queue.ID).Return(queue, nil)
 		queueRepository.On("Purge", ctx, queue.ID).Return(nil)
 
 		err := queueService.Purge(ctx, queue.ID)

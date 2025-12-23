@@ -89,6 +89,31 @@ func TestQueue(t *testing.T) {
 		assert.ErrorIs(t, err, domain.ErrQueueNotFound)
 	})
 
+	t.Run("GetMany", func(t *testing.T) {
+		defer clearDatabase(t, ctx, pool)
+
+		queueRepo := NewQueue(pool)
+
+		err := queueRepo.Create(ctx, makeQueue("my-queue-1"))
+		assert.Nil(t, err)
+		err = queueRepo.Create(ctx, makeQueue("my-queue-2"))
+		assert.Nil(t, err)
+		err = queueRepo.Create(ctx, makeQueue("my-queue-3"))
+		assert.Nil(t, err)
+
+		queues, err := queueRepo.GetMany(ctx, []string{"my-queue-1", "my-queue-3"})
+		assert.Nil(t, err)
+		assert.Len(t, queues, 2)
+		assert.NotNil(t, queues["my-queue-1"])
+		assert.NotNil(t, queues["my-queue-3"])
+		assert.Nil(t, queues["my-queue-2"])
+
+		// Test with empty slice
+		queues, err = queueRepo.GetMany(ctx, []string{})
+		assert.Nil(t, err)
+		assert.Len(t, queues, 0)
+	})
+
 	t.Run("List", func(t *testing.T) {
 		defer clearDatabase(t, ctx, pool)
 

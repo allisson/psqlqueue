@@ -91,7 +91,6 @@ func TestTopic(t *testing.T) {
 		topicService := NewTopic(topicRepository, subscriptionRepository, queueRepository, messageRepository)
 		topic := makeTopic("my-topic")
 
-		topicRepository.On("Get", ctx, topic.ID).Return(topic, nil)
 		topicRepository.On("Delete", ctx, topic.ID).Return(nil)
 
 		err := topicService.Delete(ctx, topic.ID)
@@ -112,7 +111,7 @@ func TestTopic(t *testing.T) {
 		topicRepository.On("Get", ctx, topic.ID).Return(topic, nil)
 		subscriptionRepository.On("ListByTopic", ctx, topic.ID, uint(0), uint(50)).Return([]*domain.Subscription{subscription}, nil)
 		subscriptionRepository.On("ListByTopic", ctx, topic.ID, uint(50), uint(50)).Return([]*domain.Subscription{}, nil)
-		queueRepository.On("Get", ctx, queue.ID).Return(queue, nil)
+		queueRepository.On("GetMany", ctx, []string{queue.ID}).Return(map[string]*domain.Queue{queue.ID: queue}, nil)
 		messageRepository.On("CreateMany", ctx, mock.Anything).Return(nil)
 
 		err := topicService.CreateMessage(ctx, topic.ID, message)

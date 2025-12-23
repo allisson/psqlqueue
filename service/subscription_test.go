@@ -77,7 +77,6 @@ func TestSubscription(t *testing.T) {
 		subscriptionService := NewSubscription(subscriptionRepository)
 		subscription := makeSubscription("my-subscription", "my-topic", "my-queue")
 
-		subscriptionRepository.On("Get", ctx, subscription.ID).Return(subscription, nil)
 		subscriptionRepository.On("Delete", ctx, subscription.ID).Return(nil)
 
 		err := subscriptionService.Delete(ctx, subscription.ID)
