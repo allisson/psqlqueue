@@ -72,15 +72,17 @@ func (m *Message) List(ctx context.Context, queue *domain.Queue, label *string, 
 		return messages, tx.Commit(ctx)
 	}
 
-	// Batch update all messages in a single query
+	// Update messages in memory and collect IDs for batch database update
 	messageIDs := make([]string, len(messages))
 	for i := range messages {
 		message := messages[i]
+		// Update message object in memory so it reflects the correct state when returned
 		message.DeliverySetup(queue, now)
 		messageIDs[i] = message.ID
 	}
 
-	// Update delivery_attempts, scheduled_at, and updated_at for all messages in one query
+	// Batch update all messages in the database with a single query
+	// This updates the same fields that DeliverySetup modifies in memory
 	newScheduledAt := now.Add(time.Duration(queue.AckDeadlineSeconds) * time.Second)
 	sqlQuery := `UPDATE messages SET delivery_attempts = delivery_attempts + 1, scheduled_at = $1, updated_at = $2 WHERE id = ANY($3)`
 	if _, err := tx.Exec(ctx, sqlQuery, newScheduledAt, now, messageIDs); err != nil {
