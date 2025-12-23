@@ -31,12 +31,7 @@ func (s *Subscription) List(ctx context.Context, offset, limit uint) ([]*domain.
 }
 
 func (s *Subscription) Delete(ctx context.Context, id string) error {
-	subscription, err := s.subscriptionRepository.Get(ctx, id)
-	if err != nil {
-		return err
-	}
-
-	return s.subscriptionRepository.Delete(ctx, subscription.ID)
+	return s.subscriptionRepository.Delete(ctx, id)
 }
 
 // NewSubscription returns an implementation of domain.SubscriptionService.

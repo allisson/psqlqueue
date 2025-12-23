@@ -34,12 +34,7 @@ func (t *Topic) List(ctx context.Context, offset, limit uint) ([]*domain.Topic, 
 }
 
 func (t *Topic) Delete(ctx context.Context, id string) error {
-	topic, err := t.topicRepository.Get(ctx, id)
-	if err != nil {
-		return err
-	}
-
-	return t.topicRepository.Delete(ctx, topic.ID)
+	return t.topicRepository.Delete(ctx, id)
 }
 
 func (t *Topic) CreateMessage(ctx context.Context, topicID string, message *domain.Message) error {
@@ -67,15 +62,35 @@ func (t *Topic) CreateMessage(ctx context.Context, topicID string, message *doma
 			break
 		}
 
+		// Collect unique queue IDs to fetch in batch
+		queueIDs := make([]string, 0, len(subscriptions))
+		seenQueues := make(map[string]bool)
+		for i := range subscriptions {
+			subscription := subscriptions[i]
+			if !subscription.ShouldCreateMessage(message) {
+				continue
+			}
+			if !seenQueues[subscription.QueueID] {
+				queueIDs = append(queueIDs, subscription.QueueID)
+				seenQueues[subscription.QueueID] = true
+			}
+		}
+
+		// Fetch all queues in a single query
+		queues, err := t.queueRepository.GetMany(ctx, queueIDs)
+		if err != nil {
+			return err
+		}
+
 		for i := range subscriptions {
 			subscription := subscriptions[i]
 			if !subscription.ShouldCreateMessage(message) {
 				continue
 			}
 
-			queue, err := t.queueRepository.Get(ctx, subscription.QueueID)
-			if err != nil {
-				return err
+			queue, ok := queues[subscription.QueueID]
+			if !ok {
+				return domain.ErrQueueNotFound
 			}
 
 			newMessage := &domain.Message{

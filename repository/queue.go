@@ -33,6 +33,27 @@ func (q *Queue) Get(ctx context.Context, id string) (*domain.Queue, error) {
 	return &queue, parseError(err, domain.ErrQueueNotFound, domain.ErrQueueAlreadyExists)
 }
 
+func (q *Queue) GetMany(ctx context.Context, ids []string) (map[string]*domain.Queue, error) {
+	if len(ids) == 0 {
+		return make(map[string]*domain.Queue), nil
+	}
+
+	queues := []*domain.Queue{}
+	options := pgxutil.NewFindAllOptions().WithFilter("id.in", ids)
+	err := pgxutil.Select(ctx, q.pool, q.tableName, options, &queues)
+	if err != nil {
+		return nil, parseError(err, domain.ErrQueueNotFound, domain.ErrQueueAlreadyExists)
+	}
+
+	// Convert slice to map for easy lookup
+	queueMap := make(map[string]*domain.Queue, len(queues))
+	for _, queue := range queues {
+		queueMap[queue.ID] = queue
+	}
+
+	return queueMap, nil
+}
+
 func (q *Queue) List(ctx context.Context, offset, limit uint) ([]*domain.Queue, error) {
 	queues := []*domain.Queue{}
 	options := pgxutil.NewFindAllOptions().WithOffset(int(offset)).WithLimit(int(limit)).WithOrderBy("id asc")

@@ -98,6 +98,36 @@ func (_m *QueueRepository) Get(ctx context.Context, id string) (*domain.Queue, e
 	return r0, r1
 }
 
+// GetMany provides a mock function with given fields: ctx, ids
+func (_m *QueueRepository) GetMany(ctx context.Context, ids []string) (map[string]*domain.Queue, error) {
+	ret := _m.Called(ctx, ids)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetMany")
+	}
+
+	var r0 map[string]*domain.Queue
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, []string) (map[string]*domain.Queue, error)); ok {
+		return rf(ctx, ids)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, []string) map[string]*domain.Queue); ok {
+		r0 = rf(ctx, ids)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(map[string]*domain.Queue)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, []string) error); ok {
+		r1 = rf(ctx, ids)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // List provides a mock function with given fields: ctx, offset, limit
 func (_m *QueueRepository) List(ctx context.Context, offset uint, limit uint) ([]*domain.Queue, error) {
 	ret := _m.Called(ctx, offset, limit)

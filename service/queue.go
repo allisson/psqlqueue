@@ -49,41 +49,19 @@ func (q *Queue) List(ctx context.Context, offset, limit uint) ([]*domain.Queue, 
 }
 
 func (q *Queue) Delete(ctx context.Context, id string) error {
-	queue, err := q.queueRepository.Get(ctx, id)
-	if err != nil {
-		return err
-	}
-
-	return q.queueRepository.Delete(ctx, queue.ID)
-
+	return q.queueRepository.Delete(ctx, id)
 }
 
 func (q *Queue) Stats(ctx context.Context, id string) (*domain.QueueStats, error) {
-	queue, err := q.queueRepository.Get(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-
-	return q.queueRepository.Stats(ctx, queue.ID)
-
+	return q.queueRepository.Stats(ctx, id)
 }
 
 func (q *Queue) Purge(ctx context.Context, id string) error {
-	queue, err := q.queueRepository.Get(ctx, id)
-	if err != nil {
-		return err
-	}
-
-	return q.queueRepository.Purge(ctx, queue.ID)
+	return q.queueRepository.Purge(ctx, id)
 }
 
 func (q *Queue) Cleanup(ctx context.Context, id string) error {
-	queue, err := q.queueRepository.Get(ctx, id)
-	if err != nil {
-		return err
-	}
-
-	return q.queueRepository.Cleanup(ctx, queue.ID)
+	return q.queueRepository.Cleanup(ctx, id)
 }
 
 // NewQueue returns an implementation of domain.QueueService.

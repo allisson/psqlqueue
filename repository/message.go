@@ -68,14 +68,24 @@ func (m *Message) List(ctx context.Context, queue *domain.Queue, label *string, 
 		return nil, err
 	}
 
+	if len(messages) == 0 {
+		return messages, tx.Commit(ctx)
+	}
+
+	// Batch update all messages in a single query
+	messageIDs := make([]string, len(messages))
 	for i := range messages {
 		message := messages[i]
-
 		message.DeliverySetup(queue, now)
-		if err := pgxutil.Update(ctx, tx, "", m.tableName, message.ID, &message); err != nil {
-			executeRollback(ctx, tx)
-			return nil, err
-		}
+		messageIDs[i] = message.ID
+	}
+
+	// Update delivery_attempts, scheduled_at, and updated_at for all messages in one query
+	newScheduledAt := now.Add(time.Duration(queue.AckDeadlineSeconds) * time.Second)
+	sqlQuery := `UPDATE messages SET delivery_attempts = delivery_attempts + 1, scheduled_at = $1, updated_at = $2 WHERE id = ANY($3)`
+	if _, err := tx.Exec(ctx, sqlQuery, newScheduledAt, now, messageIDs); err != nil {
+		executeRollback(ctx, tx)
+		return nil, err
 	}
 
 	return messages, tx.Commit(ctx)

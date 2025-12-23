@@ -41,6 +41,7 @@ type QueueRepository interface {
 	Create(ctx context.Context, queue *Queue) error
 	Update(ctx context.Context, queue *Queue) error
 	Get(ctx context.Context, id string) (*Queue, error)
+	GetMany(ctx context.Context, ids []string) (map[string]*Queue, error)
 	List(ctx context.Context, offset, limit uint) ([]*Queue, error)
 	Delete(ctx context.Context, id string) error
 	Stats(ctx context.Context, id string) (*QueueStats, error)
